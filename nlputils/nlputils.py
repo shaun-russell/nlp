@@ -19,7 +19,7 @@ def cli():
 # options/flags
 @click.option('--no-header', '-n', is_flag=True,
                 help='Exclude the header when processing.')
-@click.option('--dos-eol', '-n', is_flag=True,
+@click.option('--dos-eol', '-d', is_flag=True,
                 help='Use \\r\\n dos line endings. Default is UNIX.')
 # other required arguments
 @click.version_option(version='1.0.0')
