@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
   name='metrics',
   version='1.0',
-  py_modules=['metrics.py', 'tfidf.py'],
+  py_modules=['metrics', 'tfidf'],
   install_requires=['Click'],
   entry_points='''
     [console_scripts]
