@@ -33,6 +33,7 @@ def cli(in_file, path_file, out_file, #delimiter, evaluate,
   '''
   all_lines = [line.strip() for line in in_file]
   click.echo('Found {} lines.'.format(len(all_lines)))
+  exit()
   if no_header:
     del all_lines[0]
 
@@ -47,9 +48,9 @@ def cli(in_file, path_file, out_file, #delimiter, evaluate,
   for i,line in enumerate(all_lines):
     try:
       if validator.is_geotext(validator.process_all_text(line, True)):
-        saved_lines.append('{}\t{}'.format(line, 1))
+        saved_lines.append('{}\t{}'.format(line.strip(), 1))
       else:
-        saved_lines.append('{}\t{}'.format(line, 0))
+        saved_lines.append('{}\t{}'.format(line.strip(), 0))
     except:
       click.echo('\nError processing line {}'.format(i))
 
