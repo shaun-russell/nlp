@@ -23,8 +23,8 @@ def cli():
 # other required arguments
 @click.version_option(version='1.0.0')
 
-def deduplicate(in_file, out_file, no_header, dos_eol):
-  ''' Removes duplicates and blanks from a line '''
+def run_tfidf(in_file, out_file, no_header, dos_eol):
+  ''' Evaluates a list of sentences using tf-idf. '''
   all_lines = [line.strip() for line in in_file]
   click.echo('Found {} lines.'.format(len(all_lines)))
   if no_header:
@@ -62,7 +62,7 @@ def deduplicate(in_file, out_file, no_header, dos_eol):
 
     # add the tf-idf of term in each sentence as columns
     for _,doc_tokens in all_documents:
-      term_row.append(round(tfidf.tf(term, doc_tokens) * tfidf.idf(term, all_documents), 4))
+      term_row.append(tfidf.tf(term, doc_tokens) * tfidf.idf(term, all_documents))
 
     # insert average at the end (skipping the first word column)
     average_tfidf = sum(term_row[1:]) / (len(term_row[1:]))

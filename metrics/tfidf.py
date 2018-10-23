@@ -19,7 +19,7 @@ def tf(term, document):
 def idf(term, all_documents):
   ''' Inverse document frequency calculation for term in all documents (all sentences). '''
   document_count = len(all_documents)
-  documents_with_term = len([doc for doc in all_documents if term in doc])
+  documents_with_term = len([doc for _,doc in all_documents if term in doc])
   # avoid divide-by-zero errors
   if documents_with_term == 0:
     return 0
