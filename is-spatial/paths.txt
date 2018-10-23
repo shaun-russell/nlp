@@ -1,0 +1,10 @@
+# REPLACE THESE
+
+GEONOUN_DIR=PATH/TO/GEONOUNS/
+SPATIAL_GRAMMAR_DIR=PATH/TO/SPATIALGRAMMAR/
+CODEREF_DIR=PATH/TO/CODEREF/
+PLACENAME_DIR=PATH/TO/NOWHERE/
+
+# make sure these are the folders, not the files
+# also make sure that they end with a '/' because the program
+# doesn't insert those at this stage
