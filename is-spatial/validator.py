@@ -46,7 +46,7 @@ def is_geotext(token_list):
         [x for x in token_list if isinstance(x, sg.SpatialGrammarTree)])
 
     # Needs at least one placename (relatum) and at least two locations in total
-    if num_of_geonouns >= 1:
+    if num_of_geonouns >= 2:
         # Also needs at least 1 spatial grammar word.
         if num_of_spatial_grammar >= 1:
             return True
