@@ -20,6 +20,14 @@ def try_fix_encoding(sentence):
   ''' Attempt to fix the encoding and return nice text. '''
   return ftfy.fix_text(sentence)
 
+def unmicrosoft_encoding(sentence):
+  # microsoft have their own 1-byte encoding
+  try:
+    cleano = sentence.encode('cp1252').decode('utf8')
+    return cleano
+  except:
+    return sentence
+
 def has_url(sentence):
   ''' Returns True if sentence looks suspiciously like a url. '''
   if 'www' in sentence:

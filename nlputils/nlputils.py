@@ -49,7 +49,7 @@ def deduplicate(in_file, out_file, no_header, dos_eol):
 
 # options
 @click.option('--delete-trash', '-d', is_flag=True,
-              help='Delete lines with trash. Default process is to try clean them.')
+              help='Delete lines with trash. Default process is to try clean them (but will delete if uncleanable).')
 @click.option('--delete-urls', '-u', is_flag=True,
               help='Delete lines that look like urls.')
 @click.option('--no-header', '-n', is_flag=True,
@@ -85,6 +85,7 @@ def run_untrash(in_file, out_file, encoding,
   # cache these for performance
   total_word_count = len(all_lines)
   word_index = 0
+  uncleanable_lines = 0
 
   cleaned_lines = []
   # skip all lines that fail the trash check
@@ -93,8 +94,20 @@ def run_untrash(in_file, out_file, encoding,
       # if not trash, keep
       cleaned_lines.append(line)
     elif not delete_trash:
-      # line is trash, but attempt to clean
-      cleaned_lines.append(untrash.try_fix_encoding(line))
+      # line is trash, but attempt to clean with cleany library
+      cleaned = untrash.try_fix_encoding(line)
+      if not untrash.is_sentence_trash(cleaned):
+        # cleaned!
+        cleaned_lines.append(cleaned)
+      else:
+        # try solve strange microsoft encoding problems
+        cleaned = untrash.unmicrosoft_encoding(line)
+        if not untrash.is_sentence_trash(cleaned):
+          # cleaned!
+          cleaned_lines.append(cleaned)
+        else:
+          uncleanable_lines += 1
+
     # else skip it because it's trash
 
     # print progress so the user knows how long the program will take,
@@ -107,7 +120,10 @@ def run_untrash(in_file, out_file, encoding,
   click.echo('\rProcessed {} lines of {}.'.format(total_word_count, total_word_count))
 
   if delete_trash:
-    click.echo('Reduces {} lines to {} lines.'.format(len(cleaned_lines), len(all_lines)))
+    click.echo('Reduced {} lines to {} lines.'.format(len(all_lines), len(cleaned_lines)))
+  else:
+    click.echo('Found {} uncleanable lines.'.format(uncleanable_lines))
+    click.echo('Reduced {} lines to {} lines.'.format(len(all_lines), len(cleaned_lines)))
   # use the correct eol for the system
   eol = '\r\n' if dos_eol else '\n'
 
