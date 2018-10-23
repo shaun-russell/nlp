@@ -77,8 +77,8 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
       click.echo('\rProcessed {} words of {}.'.format(word_index, total_word_count), nl=False)
 
 
-  click.echo('\rProcessed {} words of {}.'.format(total_word_count, total_word_count), nl=False)
-  click.echo('\nMatrix is row:{} x col:{}'.format(len(term_doc_matrix), len(header_row)))
+  click.echo('\rProcessed {} words of {}.'.format(total_word_count, total_word_count))
+  click.echo('Matrix is row:{} x col:{}'.format(len(term_doc_matrix), len(header_row)))
   # use the correct eol for the system
   eol = '\r\n' if dos_eol else '\n'
 
