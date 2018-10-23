@@ -33,7 +33,6 @@ def cli(in_file, path_file, out_file, #delimiter, evaluate,
   '''
   all_lines = [line.strip() for line in in_file]
   click.echo('Found {} lines.'.format(len(all_lines)))
-  exit()
   if no_header:
     del all_lines[0]
 
@@ -45,6 +44,7 @@ def cli(in_file, path_file, out_file, #delimiter, evaluate,
   total_word_count = len(all_lines)
   word_index = 0
   saved_lines = []
+  saved_lines.append('sentence\tactual\talgorithm')
   for i,line in enumerate(all_lines):
     try:
       if validator.is_geotext(validator.process_all_text(line, True)):
@@ -57,7 +57,7 @@ def cli(in_file, path_file, out_file, #delimiter, evaluate,
     # print progress so the user knows how long the program will take,
     # but do it periodically because print statements are slow.
     word_index += 1
-    if word_index % 10 == 0:
+    if word_index % 50 == 0:
       click.echo('\rProcessed {} lines out of {}.'.format(word_index, total_word_count), nl=False)
 
   # use the correct eol for the system

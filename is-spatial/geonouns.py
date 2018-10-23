@@ -2,23 +2,25 @@
 import nltk
 import core as core
 
-GEONOUNS_LIST = []
+GEONOUNS_LIST = {'gn': []}
 def initialise(filepath):
   core.PATHS = core.init_paths(filepath)
   GEONOUN_PATH = "total-geowords.txt"
   GEONOUN_DIR = core.PATHS['GEONOUNS'][0]
   # GIVE THIS A FIXED PATH
-  GEONOUNS_LIST = [n.strip()
+  GEONOUNS_LIST['gn'] = [n.strip()
                   for n in open(GEONOUN_DIR + GEONOUN_PATH).readlines()]
+  print('{} geonouns found.'.format(len(GEONOUNS_LIST['gn'])))
 
 
 def is_geonoun(string):
     """ returns True if the word is found in the geonouns list """
-    return string.lower() in GEONOUNS_LIST
+    return string.lower() in GEONOUNS_LIST['gn']
 
 
 def get_all_geonouns(token_list):
     """ Returns all words that match geonouns in a given token list """
+    # print('{} geonouns found.'.format(len(GEONOUNS_LIST['gn'])))
     gnwords = []
     for (word, i) in core.get_pos(token_list, 'NN'):
         try:
@@ -110,6 +112,7 @@ def greedybinary_geonoun_search(wordlist, anchor_idx, search_range=2):
 def tag_geonouns(token_list):
     """Changes identified geonouns in the list into GNN trees, returning the modified list."""
     current_idx = 0
+    # print('{} geonouns found.'.format(len(GEONOUNS_LIST['gn'])))
     # working_list = token_list.copy(True)
     working_list = []
     while current_idx < len(token_list):

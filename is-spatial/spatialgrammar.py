@@ -4,21 +4,27 @@ import core as core
 import nltk
 
 SPATIAL_GRAMMAR_FILEPATH = ''
-SPATIAL_GRAMMAR_CATEGORIES = []
+SPATIAL_GRAMMAR_CATEGORIES = {}
 def initialise(filepath):
   core.PATHS = core.init_paths(filepath)
   SPATIAL_GRAMMAR_FILEPATH = core.PATHS['SPATIAL_GRAMMAR'][0]
-  SPATIAL_GRAMMAR_CATEGORIES = [
-      'svs',
-      'srv',
-      'srq',
-      'qtfun',
-      'qtf',
-      'msr',
-      'ls',
-      'lmv',
-      'dir'
+  categories = [
+      '_svs',
+      '_srv',
+      '_srq',
+      '_qtfun',
+      '_qtf',
+      '_msr',
+      '_ls',
+      '_lmv',
+      '_dir'
   ]
+  for cat in categories:
+    category_words = [x.strip() for x in open(
+        SPATIAL_GRAMMAR_FILEPATH + cat + ".txt").readlines()]
+    category_words.sort(key=len, reverse=True)
+    SPATIAL_GRAMMAR_CATEGORIES[cat] = category_words
+    print('{} {} grammar elements found.'.format(len(category_words), cat))
 
 
 def tag_all_spatial_grammar(working_list):
@@ -32,9 +38,9 @@ def tag_all_spatial_grammar(working_list):
 
 def tag_spatial_grammar(token_list, category):
     """Returns a list that has had only a certain category of words tagged."""
-    category_words = [x.strip() for x in open(
-        SPATIAL_GRAMMAR_FILEPATH + category + ".txt").readlines()]
-    category_words.sort(key=len, reverse=True)
+    # category_words = [x.strip() for x in open(
+    #     SPATIAL_GRAMMAR_FILEPATH + category + ".txt").readlines()]
+    # category_words.sort(key=len, reverse=True)
 
     # convert the text into a string to simplify the keyword searches
     flat_word_list = []
@@ -50,7 +56,7 @@ def tag_spatial_grammar(token_list, category):
 
     concatenated_text = " ".join(flat_word_list)
     # get the indices of the word sequences from the list
-    for spatial_word in category_words:
+    for spatial_word in SPATIAL_GRAMMAR_CATEGORIES[category]:
         # only check words that aren't already in tree structures, because those are other entities
         if spatial_word in concatenated_text:
             # now find the word, group it and tag it
