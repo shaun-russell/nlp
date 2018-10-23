@@ -13,7 +13,7 @@ def cli():
 
 @cli.command('dedupe', context_settings=CONTEXT_SETTINGS)
 # required arguments
-@click.argument('in-file', type=click.File('r', encoding='utf8'), required=True)
+@click.argument('in-file', type=click.File('r'), required=True)
 @click.argument('out-file', type=click.File('w+', encoding='utf8'), required=True)
 
 # options/flags
@@ -35,6 +35,7 @@ def deduplicate(in_file, out_file, no_header, dos_eol):
   for line in deduped_lines:
     out_file.write('{}{}'.format(line, eol))
   out_file.close()
+  click.echo('Reduced {} lines to {} lines.'.format(len(all_lines), len(deduped_lines)))
   exit()
 
 
