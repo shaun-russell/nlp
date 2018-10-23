@@ -26,6 +26,7 @@ def cli():
 def deduplicate(in_file, out_file, no_header, dos_eol):
   ''' Removes duplicates and blanks from a line '''
   all_lines = [line.strip() for line in in_file]
+  click.echo('Found {} lines.'.format(len(all_lines)))
   if no_header:
     del all_lines[0]
   all_documents = [(doc.strip(), word_tokenize(doc.lower())) for doc in  all_lines]
@@ -48,6 +49,7 @@ def deduplicate(in_file, out_file, no_header, dos_eol):
   header_row.append('TERM')
   header_row += [sentence for sentence,_ in all_documents]
   header_row.append('AVG TF-IDF')
+  term_doc_matrix.append(header_row)
 
   # store this here so we don't have to re-evaluate len when printing progress
   total_word_count = len(all_unique_words)
@@ -76,12 +78,13 @@ def deduplicate(in_file, out_file, no_header, dos_eol):
 
 
   click.echo('\rProcessed {} words of {}.'.format(total_word_count, total_word_count), nl=False)
+  click.echo('\nMatrix is row:{} x col:{}'.format(len(term_doc_matrix), len(header_row)))
   # use the correct eol for the system
   eol = '\r\n' if dos_eol else '\n'
 
   click.echo(' Saving...')
   # save the words into a tf-idf matrix, tab-separated
   for row in term_doc_matrix:
-    out_file.write('{}{}'.format([str(x) for x in row], eol))
+    out_file.write('{}{}'.format('\t'.join([str(x) for x in row]), eol))
   out_file.close()
   click.echo('Done!')
