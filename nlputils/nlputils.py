@@ -92,19 +92,19 @@ def run_untrash(in_file, out_file, encoding,
   for line in all_lines:
     if not untrash.is_sentence_trash(line):
       # if not trash, keep
-      cleaned_lines.append(line)
+      cleaned_lines.append(line.strip())
     elif not delete_trash:
       # line is trash, but attempt to clean with cleany library
       cleaned = untrash.try_fix_encoding(line)
       if not untrash.is_sentence_trash(cleaned):
         # cleaned!
-        cleaned_lines.append(cleaned)
+        cleaned_lines.append(cleaned.strip())
       else:
         # try solve strange microsoft encoding problems
         cleaned = untrash.unmicrosoft_encoding(line)
-        if not untrash.is_sentence_trash(cleaned):
+        if not untrash.is_sentence_trash(cleaned.strip()):
           # cleaned!
-          cleaned_lines.append(cleaned)
+          cleaned_lines.append(cleaned.strip())
         else:
           uncleanable_lines += 1
 
@@ -129,7 +129,7 @@ def run_untrash(in_file, out_file, encoding,
 
   click.echo('Saving...')
   for line in cleaned_lines:
-    out_file.write('{}{}'.format(line, eol))
+    out_file.write('{}{}'.format(line.strip(), eol))
   out_file.close()
   click.echo('Done!')
   exit()
