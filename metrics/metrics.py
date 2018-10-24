@@ -37,9 +37,11 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
     for word in doc_tokens:
       if word not in all_unique_words:
         all_unique_words.append(word)
+  click.echo('Found {} unique words.'.format(len(all_unique_words)))
 
   # sort so we can manually view the results easier (looking for terms)
   all_unique_words.sort()
+  click.echo('Sorted.')
 
   # with all_unique_words as the rows and sentences as the columns
   term_doc_matrix = []
@@ -56,6 +58,7 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
   word_index = 0
 
   # create a row for each term
+  click.echo('Building matrix...')
   for term in all_unique_words:
     term_row = []
     term_row.append(term)
