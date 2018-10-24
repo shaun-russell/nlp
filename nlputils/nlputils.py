@@ -48,7 +48,7 @@ def deduplicate(in_file, out_file, no_header, dos_eol):
               help='Character encoding. If errors, try a different encoding.')
 
 # options
-@click.option('--delete-trash', '-d', is_flag=True,
+@click.option('--delete-trash', '-x', is_flag=True,
               help='Delete lines with trash. Default process is to try clean them (but will delete if uncleanable).')
 @click.option('--delete-urls', '-u', is_flag=True,
               help='Delete lines that look like urls.')

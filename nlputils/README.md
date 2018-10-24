@@ -44,7 +44,7 @@ Usage: nlputils untrash [OPTIONS] IN_FILE OUT_FILE
   Fixes or purges lines with shoddy character encoding.
 
 Options:
-  -d, --delete-trash  Delete lines with trash. Default process is to try
+  -x, --delete-trash  Delete lines with trash. Default process is to try
                       clean them.
   -u, --delete-urls   Delete lines that look like urls.
   -n, --no-header     Exclude the header when processing.
