@@ -20,8 +20,8 @@ def try_fix_encoding(sentence):
   ''' Attempt to fix the encoding and return nice text. '''
   return ftfy.fix_text(sentence)
 
-def unmicrosoft_encoding(sentence):
-  # microsoft have their own 1-byte encoding
+def fix_microsoft_encoding(sentence):
+  # microsoft have their own 1-byte encoding: cp1252
   try:
     cleano = sentence.encode('cp1252').decode('utf8')
     return cleano

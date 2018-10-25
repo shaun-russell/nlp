@@ -101,7 +101,7 @@ def run_untrash(in_file, out_file, encoding,
         cleaned_lines.append(cleaned.strip())
       else:
         # try solve strange microsoft encoding problems
-        cleaned = untrash.unmicrosoft_encoding(line)
+        cleaned = untrash.fix_microsoft_encoding(line)
         if not untrash.is_sentence_trash(cleaned.strip()):
           # cleaned!
           cleaned_lines.append(cleaned.strip())
