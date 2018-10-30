@@ -31,13 +31,25 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
     del all_lines[0]
   all_documents = [(doc.strip(), word_tokenize(doc.lower())) for doc in  all_lines]
 
- # create a list of all the unique words in the full set of documents
+  click.echo('Getting unique words for tf-idf.')
+  word_index = 0
+  total_documents = len(all_documents)
+  # create a list of all the unique words in the full set of documents
   all_unique_words = []
   for _,doc_tokens in all_documents:
-    for word in doc_tokens:
-      if word not in all_unique_words:
-        all_unique_words.append(word)
-  click.echo('Found {} unique words.'.format(len(all_unique_words)))
+    try:
+      for word in doc_tokens:
+        if word not in all_unique_words:
+          all_unique_words.append(word)
+
+      word_index += 1
+      if word_index % 50 == 0:
+        click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
+    except:
+      word_index += 1
+      click.echo('Error on line: {}'.format(word_index))
+  click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
+  click.echo(' Found {} unique words.'.format(len(all_unique_words)))
 
   # sort so we can manually view the results easier (looking for terms)
   all_unique_words.sort()
@@ -75,8 +87,9 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
 
     # print progress so the user knows how long the program will take,
     # but do it periodically because print statements are slow.
+    click.echo('done?')
     word_index += 1
-    if word_index % 10 == 0:
+    if word_index % 5 == 0:
       click.echo('\rProcessed {} words of {}.'.format(word_index, total_word_count), nl=False)
 
 

@@ -16,9 +16,10 @@ def tf(term, document):
 #       like 'a', 'the', 'are'..etc are given low importance values because
 #       they are so common.
 #       IDF(t) = log(document_count / document_count_containing(t))
-def idf(term, all_documents):
+def idf(term, all_documents, doc_len = -1):
   ''' Inverse document frequency calculation for term in all documents (all sentences). '''
-  document_count = len(all_documents)
+  # cache the length of the document list
+  document_count = len(all_documents) if doc_len == -1 else doc_len
   documents_with_term = len([doc for _,doc in all_documents if term in doc])
   # avoid divide-by-zero errors
   if documents_with_term == 0:
