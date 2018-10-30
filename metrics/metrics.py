@@ -68,6 +68,7 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
 
   # store this here so we don't have to re-evaluate len when printing progress
   total_word_count = len(all_unique_words)
+  all_docs_length = len(all_documents)
   word_index = 0
 
   # create a row for each term
@@ -75,11 +76,11 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
   for term in all_unique_words:
     term_row = []
     term_row.append(term)
+    num_docs_with_term = tfidf.docs_with(term, all_documents)
 
     # add the tf-idf of term in each sentence as columns
     for i,(_,doc_tokens) in enumerate(all_documents):
-      click.echo(str(i))
-      term_row.append(tfidf.tf(term, doc_tokens) * tfidf.idf(term, all_documents))
+      term_row.append(tfidf.tf(term, doc_tokens) * tfidf.idf(term, all_documents, all_docs_length, num_docs_with_term))
 
     # insert average at the end (skipping the first word column)
     average_tfidf = sum(term_row[1:]) / (len(term_row[1:]))
@@ -91,10 +92,10 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
     # but do it periodically because print statements are slow.
     word_index += 1
     if word_index % 5 == 0:
-      click.echo('\rProcessed {} words of {}.'.format(word_index, total_word_count), nl=False)
+      click.echo('\rTF-IDF\'d {} words of {}.'.format(word_index, total_word_count), nl=False)
 
 
-  click.echo('\rProcessed {} words of {}.'.format(total_word_count, total_word_count))
+  click.echo('\rTF-IDF\'d {} words of {}.'.format(total_word_count, total_word_count))
   click.echo('Matrix is row:{} x col:{}'.format(len(term_doc_matrix), len(header_row)))
   # use the correct eol for the system
   eol = '\r\n' if dos_eol else '\n'
@@ -141,11 +142,11 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
 
       word_index += 1
       if word_index % 50 == 0:
-        click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
+        click.echo('\rUniq\'d {} documents of {}.'.format(word_index, total_documents), nl=False)
     except:
       word_index += 1
       click.echo('Error on line: {}'.format(word_index))
-  click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
+  click.echo('\rUniq\'d {} documents of {}.'.format(word_index, total_documents), nl=False)
   click.echo(' Found {} unique words.'.format(len(all_unique_words)))
 
   # sort so we can manually view the results easier (looking for terms)
@@ -175,7 +176,6 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
     # add the ppmi of term in each sentence as columns
     normsum = ppmi.get_normalisation_sum(all_documents)
     for i,(_,doc_tokens) in enumerate(all_documents):
-      click.echo(str(i))
       term_row.append(ppmi.positive_pmi(term, doc_tokens, all_documents, normsum))
 
     # insert average at the end (skipping the first word column)
@@ -186,13 +186,12 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
 
     # print progress so the user knows how long the program will take,
     # but do it periodically because print statements are slow.
-    click.echo('done?')
     word_index += 1
     if word_index % 5 == 0:
-      click.echo('\rProcessed {} words of {}.'.format(word_index, total_word_count), nl=False)
+      click.echo('\rPPMI\'d {} words of {}.'.format(word_index, total_word_count), nl=False)
 
 
-  click.echo('\rProcessed {} words of {}.'.format(total_word_count, total_word_count))
+  click.echo('\rPPMI\'d {} words of {}.'.format(total_word_count, total_word_count))
   click.echo('Matrix is row:{} x col:{}'.format(len(term_doc_matrix), len(header_row)))
   # use the correct eol for the system
   eol = '\r\n' if dos_eol else '\n'

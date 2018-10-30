@@ -1,6 +1,9 @@
 # replace all this with click package stuff
 import math
 
+def docs_with(term, all_documents):
+  return len([doc for _,doc in all_documents if term in doc])
+
 # tf = term frequency: how frequently a word appears in a document (sentence).
 #       TF(t) is num_of_occurences_of(t) / total_terms_in_document
 def tf(term, document):
@@ -16,11 +19,11 @@ def tf(term, document):
 #       like 'a', 'the', 'are'..etc are given low importance values because
 #       they are so common.
 #       IDF(t) = log(document_count / document_count_containing(t))
-def idf(term, all_documents, doc_len = -1):
+def idf(term, all_documents, doc_len=-1, doc_term_len=-1):
   ''' Inverse document frequency calculation for term in all documents (all sentences). '''
   # cache the length of the document list
   document_count = len(all_documents) if doc_len == -1 else doc_len
-  documents_with_term = len([doc for _,doc in all_documents if term in doc])
+  documents_with_term = len([doc for _,doc in all_documents if term in doc]) if doc_term_len == -1 else doc_term_len
   # avoid divide-by-zero errors
   if documents_with_term == 0:
     return 0
