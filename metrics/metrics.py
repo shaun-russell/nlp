@@ -165,6 +165,7 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
 
   # store this here so we don't have to re-evaluate len when printing progress
   total_word_count = len(all_unique_words)
+  all_docs_length = len(all_documents)
   word_index = 0
 
   # create a row for each term
@@ -172,11 +173,12 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
   for term in all_unique_words:
     term_row = []
     term_row.append(term)
+    total_occurences = ppmi.total_occurences(term, all_documents)
 
     # add the ppmi of term in each sentence as columns
     normsum = ppmi.get_normalisation_sum(all_documents)
     for i,(_,doc_tokens) in enumerate(all_documents):
-      term_row.append(ppmi.positive_pmi(term, doc_tokens, all_documents, normsum))
+      term_row.append(ppmi.positive_pmi(term, doc_tokens, all_documents, normsum, total_occurences))
 
     # insert average at the end (skipping the first word column)
     average_ppmi = sum(term_row[1:]) / (len(term_row[1:]))
