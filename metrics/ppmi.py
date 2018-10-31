@@ -17,8 +17,8 @@ import math
 
 def total_occurences(word, all_sentences):
   total_occurences = 0
-  for sent in all_sentences:
-    total_occurences += len([w for w in sent if sent == word])
+  for _,sent in all_sentences:
+    total_occurences += len([w for w in sent if w == word])
   return total_occurences
 
 
@@ -40,7 +40,11 @@ def pmi(word, sentence, all_sentences, norm_sum, total_occurences):
   # number of words in the sentence
   total_sentence_length = len(sentence) / norm_sum
 
-  pmi_value = math.log(occurences_in_sentence / (total_occurences * total_sentence_length))
+  value = occurences_in_sentence / (total_occurences * total_sentence_length)
+  # must do this to avoid math domain error
+  if value <= 0:
+    return 0
+  pmi_value = math.log(value)
   return pmi_value
 
 def positive_pmi(word, sentence, all_sentences, norm_sum, total_occurences):

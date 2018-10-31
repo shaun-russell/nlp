@@ -3,13 +3,17 @@ import tfidf
 import ppmi
 from nltk.tokenize import word_tokenize
 
+# There is a LOT of repeated code in here.
+# The TF-IDF and PPMI commands really do the same thing, so at some point
+# I will refactor this and clean it up
+
+
 # used to tell Click that -h is shorthand for help
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group()
 def cli():
   click.echo('Metrics launched.')
-
 
 @cli.command('tfidf', context_settings=CONTEXT_SETTINGS)
 # required arguments
@@ -62,7 +66,12 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
   # build the header row (word, all sentences, avg, <any extra columns>)
   header_row = []
   header_row.append('TERM')
-  header_row += [sentence for sentence,_ in all_documents]
+  for sentence,_ in all_documents:
+    sent = sentence.replace('\t','').replace('"','').strip()
+    # fix problems with bad quotes
+    # if len([x for x in sen if x == '"']) % 2 == 1:
+    #   sen += '"'
+    header_row.append(sent)
   header_row.append('AVG TF-IDF')
   term_doc_matrix.append(header_row)
 
@@ -159,13 +168,20 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
   # build the header row (word, all sentences, avg, <any extra columns>)
   header_row = []
   header_row.append('TERM')
-  header_row += [sentence for sentence,_ in all_documents]
+  for sentence,_ in all_documents:
+    sent = sentence.replace('\t','').replace('"','').strip()
+    # fix problems with bad quotes
+    # if len([x for x in sen if x == '"']) % 2 == 1:
+    #   sen += '"'
+    header_row.append(sent)
   header_row.append('AVG PPMI')
   term_doc_matrix.append(header_row)
 
   # store this here so we don't have to re-evaluate len when printing progress
   total_word_count = len(all_unique_words)
   all_docs_length = len(all_documents)
+  print(total_word_count)
+  print(all_docs_length)
   word_index = 0
 
   # create a row for each term
