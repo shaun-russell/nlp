@@ -1,6 +1,7 @@
 import click
 import dedupe
 import untrash
+import subset
 
 # used to tell Click that -h is shorthand for help
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -129,6 +130,37 @@ def run_untrash(in_file, out_file, encoding,
 
   click.echo('Saving...')
   for line in cleaned_lines:
+    out_file.write('{}{}'.format(line.strip(), eol))
+  out_file.close()
+  click.echo('Done!')
+  exit()
+
+
+@cli.command('subset', context_settings=CONTEXT_SETTINGS)
+@click.argument('in_file', type=click.File('r', encoding='utf8'), required=True)
+@click.argument('line-count', type=int, required=True)
+@click.argument('out_file', type=click.File('w+', encoding='utf8'), required=True)
+
+
+# options
+@click.option('--no-header', '-n', is_flag=True,
+                help='Exclude the header when processing.')
+@click.option('--dos-eol', '-d', is_flag=True,
+                help='Use \\r\\n dos line endings. Default is UNIX.')
+@click.version_option(version='1.0.0')
+
+def run_subset(in_file, line_count, out_file, no_header, dos_eol):
+  ''' Creates a subset of lines from a file. ''' 
+  in_lines = [x.replace('\r','').replace('\n','') for x in in_file.readlines()]
+  click.echo('Extracting...')
+  # probably change this to not be a double negative
+  sample = subset.extract_n(in_lines, line_count, not no_header)
+
+  # use the correct eol for the system
+  eol = '\r\n' if dos_eol else '\n'
+
+  click.echo('Saving...')
+  for line in sample:
     out_file.write('{}{}'.format(line.strip(), eol))
   out_file.close()
   click.echo('Done!')
