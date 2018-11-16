@@ -20,7 +20,11 @@ def cli():
 @click.argument('in-file', type=click.File('r'), required=True)
 @click.argument('out-file', type=click.File('w+', encoding='utf8'), required=True)
 
+@click.option('--words', '-w', type=click.File('r', encoding='utf8'),
+                help='Only use a specific set of words (from a file).')
 # options/flags
+@click.option('--transpose', '-t', is_flag=True,
+                help='Swap rows and columns.')
 @click.option('--no-header', '-n', is_flag=True,
                 help='Exclude the header when processing.')
 @click.option('--dos-eol', '-d', is_flag=True,
@@ -28,7 +32,7 @@ def cli():
 # other required arguments
 @click.version_option(version='1.0.0')
 
-def run_tfidf(in_file, out_file, no_header, dos_eol):
+def run_tfidf(in_file, out_file, no_header, dos_eol, words, transpose):
   ''' Evaluates a list of sentences using tf-idf. '''
   all_lines = [line.strip() for line in in_file]
   click.echo('Found {} lines.'.format(len(all_lines)))
@@ -41,36 +45,36 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
   total_documents = len(all_documents)
   # create a list of all the unique words in the full set of documents
   all_unique_words = []
-  for _,doc_tokens in all_documents:
-    try:
-      for word in doc_tokens:
-        if word not in all_unique_words:
-          all_unique_words.append(word)
+  if words:
+    all_unique_words = [x.strip() for x in words.readlines()]
+  else:
+    for _,doc_tokens in all_documents:
+      try:
+        for word in doc_tokens:
+          if word not in all_unique_words:
+            all_unique_words.append(word)
 
-      word_index += 1
-      if word_index % 50 == 0:
-        click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
-    except:
-      word_index += 1
-      click.echo('Error on line: {}'.format(word_index))
-  click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
-  click.echo(' Found {} unique words.'.format(len(all_unique_words)))
+        word_index += 1
+        if word_index % 50 == 0:
+          click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
+      except:
+        word_index += 1
+        click.echo('Error on line: {}'.format(word_index))
+    click.echo('\rProcessed {} documents of {}.'.format(word_index, total_documents), nl=False)
+    click.echo(' Found {} unique words.'.format(len(all_unique_words)))
 
-  # sort so we can manually view the results easier (looking for terms)
-  all_unique_words.sort()
-  click.echo('Sorted.')
+    # sort so we can manually view the results easier (looking for terms)
+    all_unique_words.sort()
+    click.echo('Sorted.')
 
   # with all_unique_words as the rows and sentences as the columns
   term_doc_matrix = []
 
   # build the header row (word, all sentences, avg, <any extra columns>)
   header_row = []
-  header_row.append('TERM')
+  header_row.append('TERM,IS_SPATIAL')
   for sentence,_ in all_documents:
-    sent = sentence.replace('\t','').replace('"','').strip()
-    # fix problems with bad quotes
-    # if len([x for x in sen if x == '"']) % 2 == 1:
-    #   sen += '"'
+    sent = sentence.replace('\t',',').replace('"','').strip()
     header_row.append(sent)
   header_row.append('AVG TF-IDF')
   term_doc_matrix.append(header_row)
@@ -89,7 +93,7 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
 
     # add the tf-idf of term in each sentence as columns
     for i,(_,doc_tokens) in enumerate(all_documents):
-      term_row.append(tfidf.tf(term, doc_tokens) * tfidf.idf(term, all_documents, all_docs_length, num_docs_with_term))
+      term_row.append(round(tfidf.tf(term, doc_tokens) * tfidf.idf(term, all_documents, all_docs_length, num_docs_with_term),4))
 
     # insert average at the end (skipping the first word column)
     average_tfidf = sum(term_row[1:]) / (len(term_row[1:]))
@@ -111,8 +115,13 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
 
   click.echo(' Saving...')
   # save the words into a tf-idf matrix, tab-separated
-  for row in term_doc_matrix:
-    out_file.write('{}{}'.format('\t'.join([str(x) for x in row]), eol))
+  output = term_doc_matrix
+  if transpose:
+    click.echo('Transposing...')
+    output = [*zip(*term_doc_matrix)]
+    click.echo('Matrix is row:{} x col:{}'.format(len(output), len(output[0])))
+  for row in output:
+    out_file.write('{}{}'.format(','.join([str(x) for x in row]), eol))
   out_file.close()
   click.echo('Done!')
 
@@ -122,7 +131,11 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
 @click.argument('in-file', type=click.File('r'), required=True)
 @click.argument('out-file', type=click.File('w+', encoding='utf8'), required=True)
 
+@click.option('--words', '-w', type=click.File('r', encoding='utf8'),
+                help='Only use a specific set of words (from a file).')
 # options/flags
+@click.option('--transpose', '-t', is_flag=True,
+                help='Swap rows and columns.')
 @click.option('--no-header', '-n', is_flag=True,
                 help='Exclude the header when processing.')
 @click.option('--dos-eol', '-d', is_flag=True,
@@ -130,7 +143,7 @@ def run_tfidf(in_file, out_file, no_header, dos_eol):
 # other required arguments
 @click.version_option(version='1.0.0')
 
-def run_ppmi(in_file, out_file, no_header, dos_eol):
+def run_ppmi(in_file, out_file, no_header, dos_eol, words, transpose):
   ''' Evaluates a list of sentences using tf-idf. '''
   all_lines = [line.strip() for line in in_file]
   click.echo('Found {} lines.'.format(len(all_lines)))
@@ -143,36 +156,36 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
   total_documents = len(all_documents)
   # create a list of all the unique words in the full set of documents
   all_unique_words = []
-  for _,doc_tokens in all_documents:
-    try:
-      for word in doc_tokens:
-        if word not in all_unique_words:
-          all_unique_words.append(word)
+  if words:
+    all_unique_words = [x.strip() for x in words.readlines()]
+  else:
+    for _,doc_tokens in all_documents:
+      try:
+        for word in doc_tokens:
+          if word not in all_unique_words:
+            all_unique_words.append(word)
 
-      word_index += 1
-      if word_index % 50 == 0:
-        click.echo('\rUniq\'d {} documents of {}.'.format(word_index, total_documents), nl=False)
-    except:
-      word_index += 1
-      click.echo('Error on line: {}'.format(word_index))
-  click.echo('\rUniq\'d {} documents of {}.'.format(word_index, total_documents), nl=False)
-  click.echo(' Found {} unique words.'.format(len(all_unique_words)))
+        word_index += 1
+        if word_index % 50 == 0:
+          click.echo('\rUniq\'d {} documents of {}.'.format(word_index, total_documents), nl=False)
+      except:
+        word_index += 1
+        click.echo('Error on line: {}'.format(word_index))
+    click.echo('\rUniq\'d {} documents of {}.'.format(word_index, total_documents), nl=False)
+    click.echo(' Found {} unique words.'.format(len(all_unique_words)))
 
-  # sort so we can manually view the results easier (looking for terms)
-  all_unique_words.sort()
-  click.echo('Sorted.')
+    # sort so we can manually view the results easier (looking for terms)
+    all_unique_words.sort()
+    click.echo('Sorted.')
 
   # with all_unique_words as the rows and sentences as the columns
   term_doc_matrix = []
 
   # build the header row (word, all sentences, avg, <any extra columns>)
   header_row = []
-  header_row.append('TERM')
+  header_row.append('TERM,IS_SPATIAL')
   for sentence,_ in all_documents:
-    sent = sentence.replace('\t','').replace('"','').strip()
-    # fix problems with bad quotes
-    # if len([x for x in sen if x == '"']) % 2 == 1:
-    #   sen += '"'
+    sent = sentence.replace('\t',',').replace('"','').strip()
     header_row.append(sent)
   header_row.append('AVG PPMI')
   term_doc_matrix.append(header_row)
@@ -194,7 +207,7 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
     # add the ppmi of term in each sentence as columns
     normsum = ppmi.get_normalisation_sum(all_documents)
     for i,(_,doc_tokens) in enumerate(all_documents):
-      term_row.append(ppmi.positive_pmi(term, doc_tokens, all_documents, normsum, total_occurences))
+      term_row.append(round(ppmi.positive_pmi(term, doc_tokens, all_documents, normsum, total_occurences, 4)))
 
     # insert average at the end (skipping the first word column)
     average_ppmi = sum(term_row[1:]) / (len(term_row[1:]))
@@ -216,7 +229,12 @@ def run_ppmi(in_file, out_file, no_header, dos_eol):
 
   click.echo(' Saving...')
   # save the words into a tf-idf matrix, tab-separated
-  for row in term_doc_matrix:
-    out_file.write('{}{}'.format('\t'.join([str(x) for x in row]), eol))
+  output = term_doc_matrix
+  if transpose:
+    click.echo('Transposing...')
+    output = [*zip(*term_doc_matrix)]
+    click.echo('Matrix is row:{} x col:{}'.format(len(output), len(output[0])))
+  for row in output:
+    out_file.write('{}{}'.format(','.join([str(x) for x in row]), eol))
   out_file.close()
   click.echo('Done!')

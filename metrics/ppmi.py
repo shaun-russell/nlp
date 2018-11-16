@@ -44,7 +44,7 @@ def pmi(word, sentence, all_sentences, norm_sum, total_occurences):
   # must do this to avoid math domain error
   if value <= 0:
     return 0
-  pmi_value = math.log(value)
+  pmi_value = math.log(value, 2)
   return pmi_value
 
 def positive_pmi(word, sentence, all_sentences, norm_sum, total_occurences):

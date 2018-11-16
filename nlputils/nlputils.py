@@ -2,6 +2,7 @@ import click
 import dedupe
 import untrash
 import subset
+import frequencies
 
 # used to tell Click that -h is shorthand for help
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -165,4 +166,36 @@ def run_subset(in_file, line_count, out_file, no_header, dos_eol):
   out_file.close()
   click.echo('Done!')
   exit()
+
+
+@cli.command('freq', context_settings=CONTEXT_SETTINGS)
+@click.argument('in_file', type=click.File('r', encoding='utf8'), required=True)
+@click.argument('num', type=int, required=True)
+@click.argument('out_file', type=click.File('w+', encoding='utf8'), required=True)
+
+
+# options
+@click.option('--no-header', '-n', is_flag=True,
+                help='Exclude the header when processing.')
+@click.option('--dos-eol', '-d', is_flag=True,
+                help='Use \\r\\n dos line endings. Default is UNIX.')
+@click.version_option(version='1.0.0')
+
+def run_subset(in_file, out_file, no_header, dos_eol, num):
+  ''' Creates a subset of lines from a file. ''' 
+  in_lines = [x.replace('\r','').replace('\n','') for x in in_file.readlines()]
+  click.echo('Extracting...')
+  # probably change this to not be a double negative
+  
+
+  # use the correct eol for the system
+  eol = '\r\n' if dos_eol else '\n'
+
+  click.echo('Saving...')
+  for word,num in frequencies.get_most_frequent_n(in_lines, num):
+    out_file.write('{}{}'.format(word, eol))
+  out_file.close()
+  click.echo('Done!')
+  exit()
+
 
