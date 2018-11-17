@@ -207,7 +207,7 @@ def run_ppmi(in_file, out_file, no_header, dos_eol, words, transpose):
     # add the ppmi of term in each sentence as columns
     normsum = ppmi.get_normalisation_sum(all_documents)
     for i,(_,doc_tokens) in enumerate(all_documents):
-      term_row.append(round(ppmi.positive_pmi(term, doc_tokens, all_documents, normsum, total_occurences, 4)))
+      term_row.append(round(ppmi.positive_pmi(term, doc_tokens, all_documents, normsum, total_occurences), 4))
 
     # insert average at the end (skipping the first word column)
     average_ppmi = sum(term_row[1:]) / (len(term_row[1:]))
@@ -238,3 +238,51 @@ def run_ppmi(in_file, out_file, no_header, dos_eol, words, transpose):
     out_file.write('{}{}'.format(','.join([str(x) for x in row]), eol))
   out_file.close()
   click.echo('Done!')
+
+
+@cli.command('arff', context_settings=CONTEXT_SETTINGS)
+@click.argument('in_file', type=click.File('r', encoding='utf8'), required=True)
+@click.argument('class-variable', type=str, required=True)
+@click.argument('class-values', type=str, required=True)
+@click.argument('out_file', type=click.File('w+', encoding='utf8'), required=True)
+
+# options
+@click.option('--dos-eol', '-d', is_flag=True,
+                help='Use \\r\\n dos line endings. Default is UNIX.')
+@click.version_option(version='1.0.0')
+
+def run_subset(in_file, out_file, dos_eol, class_variable, class_values):
+  ''' Generate .arff file from results. ''' 
+  in_lines = [x.replace('\r','').replace('\n','') for x in in_file.readlines()]
+  click.echo('Extracting...')
+  # use the correct eol for the system
+  eol = '\r\n' if dos_eol else '\n'
+
+  out_file.write('@RELATION arffie' + eol)
+
+  header = in_lines[0]
+  values = in_lines[1].split(',')
+  attribute_string = ''
+  for i,thing in enumerate(header.split(',')):
+    if thing.lower() == class_variable.lower():
+      attribute_string += '@ATTRIBUTE "{}" '.format(thing) + '{' + ','.join(class_values) + '}' + eol
+      continue
+    try:
+      float(values[i])
+      attribute_string += '@ATTRIBUTE "{}" NUMERIC{}'.format(thing, eol)
+    except:
+      attribute_string += '@ATTRIBUTE "{}" STRING{}'.format(thing, eol)
+  out_file.write(attribute_string)
+
+  out_file.write('@DATA{}'.format(eol))
+  click.echo('Saving...')
+  for row in in_lines[1:]:
+    if row.startswith('AVG '):
+      continue
+    out_file.write('{}{}'.format(row, eol))
+  out_file.close()
+  click.echo('Done!')
+  exit()
+
+
+
